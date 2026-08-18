@@ -289,10 +289,11 @@
   }
 
   .cal-day.full {
-    background: rgba(255, 100, 160, 0.25);
-    color: #ff7ab8;
-    font-weight: 800;
-  }
+  background: rgba(255, 100, 160, 0.28);
+  color: #ff7ab8;
+  font-weight: 800;
+  box-shadow: 0 0 10px rgba(255, 122, 184, 0.35);
+}
 
   .cal-day.full::after {
     content: "🔥";
@@ -408,7 +409,6 @@
       <button onclick="changeMonth(1)">›</button>
     </div>
     <div class="cal-grid" id="calGrid"></div>
-    <div class="legend">★ = その日全部クリア</div>
   </div>
 
   <div class="modal" id="commentModal">
@@ -764,41 +764,56 @@ const COMMENTS = {
 
     // ========== カレンダー ==========
     function renderCalendar() {
-      const grid = document.getElementById("calGrid");
-      grid.innerHTML = "";
+  const grid = document.getElementById("calGrid");
+  grid.innerHTML = "";
 
-      const dayNames = ["日","月","火","水","木","金","土"];
-      dayNames.forEach(d => {
-        const el = document.createElement("div");
-        el.className = "cal-day-name";
-        el.textContent = d;
-        grid.appendChild(el);
-      });
+  const dayNames = ["日","月","火","水","木","金","土"];
+  dayNames.forEach(d => {
+    const el = document.createElement("div");
+    el.className = "cal-day-name";
+    el.textContent = d;
+    grid.appendChild(el);
+  });
 
-      const first = new Date(calYear, calMonth, 1);
-      const last = new Date(calYear, calMonth + 1, 0);
-      const startDay = first.getDay();
-      const daysInMonth = last.getDate();
-      const todayKey = getTodayKey();
+  const first = new Date(calYear, calMonth, 1);
+  const last = new Date(calYear, calMonth + 1, 0);
+  const startDay = first.getDay();
+  const daysInMonth = last.getDate();
+  const todayKey = getTodayKey();
 
-      document.getElementById("calTitle").textContent = `${calYear}年${calMonth+1}月`;
+  document.getElementById("calTitle").textContent = `${calYear}年${calMonth+1}月`;
 
-      for (let i = 0; i < startDay; i++) {
-        const empty = document.createElement("div");
-        empty.className = "cal-day empty";
-        grid.appendChild(empty);
-      }
+  // 空白セル
+  for (let i = 0; i < startDay; i++) {
+    const empty = document.createElement("div");
+    empty.className = "cal-day empty";
+    grid.appendChild(empty);
+  }
 
-      for (let d = 1; d <= daysInMonth; d++) {
-        const key = `${calYear}-${String(calMonth+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
-        const el = document.createElement("div");
-        el.className = "cal-day";
-        el.textContent = d;
-        if (key === todayKey) el.classList.add("today");
-        if (fullClearDates.includes(key)) el.classList.add("full");
-        grid.appendChild(el);
-      }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const key = `${calYear}-${String(calMonth+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const el = document.createElement("div");
+    el.className = "cal-day";
+
+    // その日のクリア数を計算
+    const dayData = data[key] || {};
+    const cleared = MISSIONS.filter(m => dayData[m.id] === true).length;
+    const total = MISSIONS.length; // 7
+
+    if (cleared > 0) {
+      el.textContent = `${cleared}/${total}`;
+      el.style.fontSize = "0.72rem";
+      el.style.fontWeight = "700";
+    } else {
+      el.textContent = d; // 記録がない日は普通に日付
     }
+
+    if (key === todayKey) el.classList.add("today");
+    if (cleared === total) el.classList.add("full"); // 7/7の日は特別に光らせる
+
+    grid.appendChild(el);
+  }
+}
 
     function changeMonth(delta) {
       calMonth += delta;
