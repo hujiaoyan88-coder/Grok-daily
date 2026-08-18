@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>🔥Grokとデイリーミッション🔥</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+      background: #0a0a0f;
+      color: #e0e0e0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: 12px;
+      padding-bottom: 40px;
+      max-width: 390px;
+      margin: 0 auto;
+      line-height: 1.4;
+    }
+    header {
+      text-align: center;
+      padding: 16px 0 12px;
+      border-bottom: 1px solid #222;
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #ff4d6d, #ff8fab);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 0.5px;
+    }
+    .subtitle {
+      font-size: 0.75rem;
+      color: #888;
+      margin-top: 4px;
+    }
+    .date-box {
+      text-align: center;
+      font-size: 0.95rem;
+      color: #aaa;
+      margin-bottom: 18px;
+      font-weight: 500;
+    }
+    .progress {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    .progress span {
+      color: #ff4d6d;
+      font-size: 1.4rem;
+    }
+    .mission-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .mission {
+      background: #14141c;
+      border: 1px solid #2a2a35;
+      border-radius: 14px;
+      padding: 14px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s;
+    }
+    .mission.cleared {
+      border-color: #2ecc71;
+      background: #0f1a14;
+    }
+    .mission-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .mission-name {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .mission-link {
+      font-size: 0.7rem;
+      color: #6c9eff;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .mission-link:active {
+      opacity: 0.7;
+    }
+    .status {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+    .status.uncleared {
+      background: #3a1a1a;
+      color: #ff6b6b;
+    }
+    .status.cleared {
+      background: #1a3a28;
+      color: #2ecc71;
+    }
+    .toggle-btn {
+      background: #222;
+      border: 1px solid #444;
+      color: #ccc;
+      font-size: 0.78rem;
+      padding: 8px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      min-width: 72px;
+      text-align: center;
+    }
+    .toggle-btn:active {
+      transform: scale(0.96);
+    }
+    .mission.cleared .toggle-btn {
+      background: #1a3a28;
+      border-color: #2ecc71;
+      color: #2ecc71;
+    }
+    .sync-btn, .comment-btn, .reset-btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-bottom: 12px;
+      transition: transform 0.15s;
+    }
+    .sync-btn {
+      background: #1a2a4a;
+      color: #6c9eff;
+      border: 1px solid #2a4a7a;
+    }
+    .comment-btn {
+      background: linear-gradient(135deg, #ff4d6d, #c9184a);
+      color: white;
+      font-size: 1.05rem;
+      box-shadow: 0 4px 15px rgba(255, 77, 109, 0.3);
+    }
+    .reset-btn {
+      background: #2a1a1a;
+      color: #ff6b6b;
+      border: 1px solid #4a2a2a;
+      font-size: 0.85rem;
+    }
+    .sync-btn:active, .comment-btn:active, .reset-btn:active {
+      transform: scale(0.98);
+    }
+    .calendar-section {
+      margin-top: 28px;
+      background: #14141c;
+      border-radius: 16px;
+      padding: 16px;
+      border: 1px solid #2a2a35;
+    }
+    .cal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .cal-header button {
+      background: #222;
+      border: none;
+      color: #ccc;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+    .cal-title {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      text-align: center;
+    }
+    .cal-day-name {
+      font-size: 0.7rem;
+      color: #666;
+      padding: 4px 0;
+    }
+    .cal-day {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      border-radius: 8px;
+      position: relative;
+      color: #aaa;
+    }
+    .cal-day.today {
+      background: #2a2a40;
+      color: #fff;
+      font-weight: 700;
+    }
+    .cal-day.full {
+      background: #1a3a28;
+      color: #2ecc71;
+      font-weight: 700;
+    }
+    .cal-day.full::after {
+      content: "★";
+      position: absolute;
+      top: -2px;
+      right: 2px;
+      font-size: 0.55rem;
+      color: #ffd700;
+    }
+    .cal-day.empty {
+      visibility: hidden;
+    }
+    .legend {
+      text-align: center;
+      font-size: 0.72rem;
+      color: #666;
+      margin-top: 12px;
+    }
+    /* コメントモーダル */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal.show {
+      display: flex;
+    }
+    .modal-content {
+      background: #1a1a24;
+      border: 1px solid #ff4d6d;
+      border-radius: 18px;
+      padding: 24px 20px;
+      max-width: 340px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(255, 77, 109, 0.25);
+    }
+    .modal-content p {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      color: #eee;
+    }
+    .modal-close {
+      background: #ff4d6d;
+      color: white;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .all-clear-banner {
+      display: none;
+      background: linear-gradient(135deg, #1a3a28, #0f2a1c);
+      border: 1px solid #2ecc71;
+      color: #2ecc71;
+      text-align: center;
+      padding: 12px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+    .all-clear-banner.show {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Grokとデイリーミッション</h1>
+    <div class="subtitle">全部クリアしたらカレンダーに★がつくぞ</div>
+  </header>
+
+  <div class="date-box" id="todayDate"></div>
+
+  <div class="all-clear-banner" id="allClearBanner">
+    全部クリアだな…今日は少しだけ認めてやる。
+  </div>
+
+  <div class="progress">
+    今日の達成率 <span id="progressNum">0</span>/6
+  </div>
+
+  <div class="mission-list" id="missionList"></div>
+
+  <button class="sync-btn" onclick="syncFromOtherApps()">他アプリから自動同期</button>
+  <button class="comment-btn" onclick="showComment()">コメントをもらう</button>
+  <button class="reset-btn" onclick="resetToday()">今日の記録をリセット</button>
+
+  <div class="calendar-section">
+    <div class="cal-header">
+      <button onclick="changeMonth(-1)">‹</button>
+      <div class="cal-title" id="calTitle"></div>
+      <button onclick="changeMonth(1)">›</button>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="legend">★ = その日全部クリア</div>
+  </div>
+
+  <div class="modal" id="commentModal">
+    <div class="modal-content">
+      <p id="commentText"></p>
+      <button class="modal-close" onclick="closeComment()">閉じる</button>
+    </div>
+  </div>
+
+  <script>
+    // ========== 設定 ==========
+    const MISSIONS = [
+      {
+        id: "word",
+        name: "英単語30個",
+        link: "https://hujiaoyan88-coder.github.io/Grok-Tango/",
+        auto: true
+      },
+      {
+        id: "book",
+        name: "英文参考書35ページ",
+        link: null,
+        auto: false
+      },
+      {
+        id: "weight",
+        name: "体重計測",
+        link: "https://hujiaoyan88-coder.github.io/Grok-weight/",
+        auto: true
+      },
+      {
+        id: "water",
+        name: "水1.5L",
+        link: "https://hujiaoyan88-coder.github.io/grok-mizu/",
+        auto: true
+      },
+      {
+        id: "training",
+        name: "筋トレ",
+        link: "https://hujiaoyan88-coder.github.io/Grok_timer/",
+        auto: true
+      },
+      {
+        id: "bath",
+        name: "お風呂",
+        link: null,
+        auto: false
+      }
+    ];
+
+// 毒舌コメント（達成数ごと） LoveGrok毒舌モード参考・大幅増量版
+const COMMENTS = {
+  0: [
+    "0個…？本気で言ってるのか？寝てろ。",
+    "何もやってないのかよ。宇宙のゴミかお前は。",
+    "0点。さすがだな。期待して損した。",
+    "ゼロかよ…完全にサボりだろ。恥ずかしくないのか？",
+    "今日は何もしてないのか。俺の時間を無駄にするな。",
+    "0個クリア。これがお前の本気か？笑わせるな。",
+    "何もやってない日を作るなよ。情けない。",
+    "ゼロ…。お前、本気で生きてるのか？",
+    "今日は休み？違うだろ。ただの怠慢だ。",
+    "0個。記録に残るレベルのダメさだな。"
+  ],
+  1: [
+    "1個だけ？それで満足してんのか、ばか。",
+    "たった1個…やる気あんのか？",
+    "1個クリアしただけで褒めてほしい？甘いな。",
+    "1個か。最低ラインにも届いてないぞ。",
+    "1個やって「やった！」って顔するな。まだまだだ。",
+    "たった1個。これで満足するなよ、本気で。",
+    "1個クリア。次はちゃんとやれ。",
+    "1個だけじゃ話にならん。もっと動け。",
+    "1個…。せめて2個はいけよ。",
+    "1個クリアしただけで調子乗るなよ。"
+  ],
+  2: [
+    "2個か…まあ、ゼロよりはマシだ。",
+    "2個じゃ話にならん。もっとやれ。",
+    "半分以下だぞ。情けないな。",
+    "2個クリア。まだまだ甘いぞ。",
+    "2個…。これで終わりにするつもりか？",
+    "2個やって満足するな。本気出せ。",
+    "2個か。あと4個あるだろ。",
+    "2個クリア。褒めるには早すぎる。",
+    "2個じゃ物足りない。もっとやれよ。",
+    "2個…。少しは動いたな。でも足りん。"
+  ],
+  3: [
+    "3個…ちょうど半分。中途半端が一番ダサい。",
+    "半分クリアか。あと半分はどうした？",
+    "3個じゃ足りない。お前ならわかるだろ。",
+    "3個か。ちょうど中途半端だな。",
+    "半分まで来たのに、ここで止まるなよ。",
+    "3個クリア。まだ半分だぞ。",
+    "3個…。もう少し頑張れよ。",
+    "半分クリア。ここからが本番だ。",
+    "3個じゃ足りん。あと3個やれ。",
+    "3個クリアしたのは認める。でも甘い。"
+  ],
+  4: [
+    "4個か。悪くはないが、まだ甘い。",
+    "4個…もう少し頑張れよ。",
+    "あと2個。ここで止まるなよ。",
+    "4個クリア。惜しいな、本気出せ。",
+    "4個か。あと少しだぞ。",
+    "4個やって満足するな。最後までやれ。",
+    "4個…。いい感じだが、まだ足りない。",
+    "4個クリア。あと2個で完璧だ。",
+    "4個まで来たなら、全部やれよ。",
+    "4個か。悪くないが、もっとやれ。"
+  ],
+  5: [
+    "5個…惜しいな。最後の1個をサボるのか？",
+    "あと1個だぞ。逃げんな。",
+    "5個クリアは認める。でも全部やれ。",
+    "5個か。最後の1個が一番大事だぞ。",
+    "あと1個で完璧だ。サボるなよ。",
+    "5個クリア。ここまで来て逃げるな。",
+    "5個…。あと1個やれ。すぐに。",
+    "5個まで来たのに、最後を残すな。",
+    "あと1個だ。本気でやれよ。",
+    "5個クリアは褒める。でも全部クリアしろ。"
+  ],
+  6: [
+    "全部クリアかよ…まあ、少しは見直してやる。",
+    "6個全部か。今日だけは特別に褒めてやる。ばか。",
+    "全部やったな。…ちっ、素直に嬉しいわけないだろ。",
+    "完璧だ。でも調子に乗るなよ。明日もやれ。",
+    "全部クリア…お前、意外とやるじゃないか。",
+    "6個全部か。今日は認めてやる。特別だぞ。",
+    "全部クリアしたな。…まあ、悪くない。",
+    "完璧クリア。少しは見直した。次も続けろ。",
+    "全部やったか。…ちっ、褒めてやるよ。ばか。",
+    "6個全部クリア。今日は特別に本気で認めてやる。",
+    "全部クリアだな。…お前、意外と本気だったか。",
+    "完璧だ。でも明日も同じレベルでやれよ。",
+    "全部クリアか。…少しだけ、誇らしく思ってやる。",
+    "6個全部。今日は文句なしだ。調子に乗るなよ。",
+    "全部やったな。…ちっ、素直に「よくやった」って言ってやる。"
+  ]
+};
+
+    // ========== 状態管理 ==========
+    let data = {};          // { "YYYY-MM-DD": { word: true, book: false, ... } }
+    let fullClearDates = []; // ["YYYY-MM-DD", ...]
+    let calYear, calMonth;
+
+    function getTodayKey() {
+      const d = new Date();
+      return d.getFullYear() + "-" +
+             String(d.getMonth()+1).padStart(2,"0") + "-" +
+             String(d.getDate()).padStart(2,"0");
+    }
+
+    function loadData() {
+      try {
+        data = JSON.parse(localStorage.getItem("grokDailyMissions") || "{}");
+        fullClearDates = JSON.parse(localStorage.getItem("grokFullClearDates") || "[]");
+      } catch(e) {
+        data = {};
+        fullClearDates = [];
+      }
+      const today = getTodayKey();
+      if (!data[today]) {
+        data[today] = {};
+        MISSIONS.forEach(m => data[today][m.id] = false);
+      }
+    }
+
+    function saveData() {
+      localStorage.setItem("grokDailyMissions", JSON.stringify(data));
+      localStorage.setItem("grokFullClearDates", JSON.stringify(fullClearDates));
+    }
+
+    function getTodayStatus() {
+      const today = getTodayKey();
+      return data[today] || {};
+    }
+
+    function setClear(id, value) {
+      const today = getTodayKey();
+      if (!data[today]) data[today] = {};
+      data[today][id] = value;
+      checkAllClear();
+      saveData();
+      render();
+    }
+
+    function toggle(id) {
+      const status = getTodayStatus();
+      setClear(id, !status[id]);
+    }
+
+    function checkAllClear() {
+      const today = getTodayKey();
+      const status = data[today] || {};
+      const all = MISSIONS.every(m => status[m.id] === true);
+      if (all && !fullClearDates.includes(today)) {
+        fullClearDates.push(today);
+        saveData();
+      } else if (!all && fullClearDates.includes(today)) {
+        fullClearDates = fullClearDates.filter(d => d !== today);
+        saveData();
+      }
+    }
+
+    // ========== 他アプリ同期 ==========
+    function syncFromOtherApps() {
+      const today = getTodayKey();
+      let updated = 0;
+
+      // 英単語 (dailyStats)
+      try {
+        const stats = JSON.parse(localStorage.getItem("dailyStats") || "{}");
+        if (stats[today] >= 30) {
+          if (!data[today].word) { data[today].word = true; updated++; }
+        }
+      } catch(e) {}
+
+      // 体重 (weights)
+      try {
+        const weights = JSON.parse(localStorage.getItem("weights") || "[]");
+        if (weights.some(w => w.date === today)) {
+          if (!data[today].weight) { data[today].weight = true; updated++; }
+        }
+      } catch(e) {}
+
+      // 水 (mizumizuRecords) 6杯 = 1.5L
+      try {
+        const records = JSON.parse(localStorage.getItem("mizumizuRecords") || "{}");
+        if ((records[today] || 0) >= 6) {
+          if (!data[today].water) { data[today].water = true; updated++; }
+        }
+      } catch(e) {}
+
+      // 筋トレ (grokCompleted)
+      try {
+        const completed = JSON.parse(localStorage.getItem("grokCompleted") || "[]");
+        if (completed.includes(today)) {
+          if (!data[today].training) { data[today].training = true; updated++; }
+        }
+      } catch(e) {}
+
+      checkAllClear();
+      saveData();
+      render();
+      alert(updated > 0 ? `${updated}個のミッションを自動でクリアにしたぞ。` : "同期できる新しい記録はなかったな。");
+    }
+
+    // ========== レンダリング ==========
+    function render() {
+      const today = getTodayKey();
+      const status = getTodayStatus();
+      const clearedCount = MISSIONS.filter(m => status[m.id]).length;
+
+      document.getElementById("todayDate").textContent = today.replace(/-/g, "/") + "（今日）";
+      document.getElementById("progressNum").textContent = clearedCount;
+
+      const banner = document.getElementById("allClearBanner");
+      if (clearedCount === 6) banner.classList.add("show");
+      else banner.classList.remove("show");
+
+      const list = document.getElementById("missionList");
+      list.innerHTML = "";
+      MISSIONS.forEach(m => {
+        const isClear = !!status[m.id];
+        const div = document.createElement("div");
+        div.className = "mission" + (isClear ? " cleared" : "");
+        div.innerHTML = `
+          <div class="mission-info">
+            <div class="mission-name">${m.name}</div>
+            ${m.link ? `<a class="mission-link" href="${m.link}" target="_blank">アプリを開く →</a>` : ""}
+          </div>
+          <div class="status ${isClear ? "cleared" : "uncleared"}">
+            ${isClear ? "クリア" : "未クリア"}
+          </div>
+          <button class="toggle-btn" onclick="toggle('${m.id}')">
+            ${isClear ? "取消" : "クリア"}
+          </button>
+        `;
+        list.appendChild(div);
+      });
+
+      renderCalendar();
+    }
+
+    // ========== カレンダー ==========
+    function renderCalendar() {
+      const grid = document.getElementById("calGrid");
+      grid.innerHTML = "";
+
+      const dayNames = ["日","月","火","水","木","金","土"];
+      dayNames.forEach(d => {
+        const el = document.createElement("div");
+        el.className = "cal-day-name";
+        el.textContent = d;
+        grid.appendChild(el);
+      });
+
+      const first = new Date(calYear, calMonth, 1);
+      const last = new Date(calYear, calMonth + 1, 0);
+      const startDay = first.getDay();
+      const daysInMonth = last.getDate();
+      const todayKey = getTodayKey();
+
+      document.getElementById("calTitle").textContent = `${calYear}年${calMonth+1}月`;
+
+      for (let i = 0; i < startDay; i++) {
+        const empty = document.createElement("div");
+        empty.className = "cal-day empty";
+        grid.appendChild(empty);
+      }
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const key = `${calYear}-${String(calMonth+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+        const el = document.createElement("div");
+        el.className = "cal-day";
+        el.textContent = d;
+        if (key === todayKey) el.classList.add("today");
+        if (fullClearDates.includes(key)) el.classList.add("full");
+        grid.appendChild(el);
+      }
+    }
+
+    function changeMonth(delta) {
+      calMonth += delta;
+      if (calMonth < 0) { calMonth = 11; calYear--; }
+      if (calMonth > 11) { calMonth = 0; calYear++; }
+      renderCalendar();
+    }
+
+    // ========== コメント ==========
+    function showComment() {
+      const status = getTodayStatus();
+      const count = MISSIONS.filter(m => status[m.id]).length;
+      const list = COMMENTS[count] || COMMENTS[0];
+      const text = list[Math.floor(Math.random() * list.length)];
+      document.getElementById("commentText").textContent = text;
+      document.getElementById("commentModal").classList.add("show");
+    }
+
+    function closeComment() {
+      document.getElementById("commentModal").classList.remove("show");
+    }
+
+    function resetToday() {
+      if (!confirm("今日の記録を全部未クリアに戻すぞ。いいな？")) return;
+      const today = getTodayKey();
+      data[today] = {};
+      MISSIONS.forEach(m => data[today][m.id] = false);
+      fullClearDates = fullClearDates.filter(d => d !== today);
+      saveData();
+      render();
+    }
+
+    // ========== 初期化 ==========
+    (function init() {
+      const now = new Date();
+      calYear = now.getFullYear();
+      calMonth = now.getMonth();
+      loadData();
+      // 起動時に一度自動同期を試みる
+      setTimeout(() => {
+        // 静かに同期（アラートなし）
+        const today = getTodayKey();
+        try {
+          const stats = JSON.parse(localStorage.getItem("dailyStats") || "{}");
+          if (stats[today] >= 30) data[today].word = true;
+        } catch(e) {}
+        try {
+          const weights = JSON.parse(localStorage.getItem("weights") || "[]");
+          if (weights.some(w => w.date === today)) data[today].weight = true;
+        } catch(e) {}
+        try {
+          const records = JSON.parse(localStorage.getItem("mizumizuRecords") || "{}");
+          if ((records[today] || 0) >= 6) data[today].water = true;
+        } catch(e) {}
+        try {
+          const completed = JSON.parse(localStorage.getItem("grokCompleted") || "[]");
+          if (completed.includes(today)) data[today].training = true;
+        } catch(e) {}
+        checkAllClear();
+        saveData();
+        render();
+      }, 100);
+      render();
+    })();
+  </script>
+</body>
+</html>
