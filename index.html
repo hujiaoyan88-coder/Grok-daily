@@ -281,6 +281,35 @@
     font-weight: 500;
   }
 
+    .cal-day {
+  flex-direction: column;
+  gap: 1px;
+  padding: 2px 0;
+}
+
+.day-num {
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.day-score {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #ff9ec8;
+  line-height: 1;
+  opacity: 0.95;
+}
+
+.cal-day.full .day-score {
+  color: #ff7ab8;
+  text-shadow: 0 0 6px rgba(255, 122, 184, 0.5);
+}
+
+.cal-day.today .day-num {
+  font-weight: 800;
+}
+
   .cal-day.today {
     background: rgba(120, 60, 180, 0.45);
     color: #fff;
@@ -800,27 +829,22 @@ const COMMENTS = {
     const cleared = MISSIONS.filter(m => dayData[m.id] === true).length;
     const total = MISSIONS.length; // 7
 
+    // 日付 + 下にスコア
     if (cleared > 0) {
-      el.textContent = `${cleared}/${total}`;
-      el.style.fontSize = "0.72rem";
-      el.style.fontWeight = "700";
+      el.innerHTML = `
+        <div class="day-num">${d}</div>
+        <div class="day-score">${cleared}/${total}</div>
+      `;
     } else {
-      el.textContent = d; // 記録がない日は普通に日付
+      el.innerHTML = `<div class="day-num">${d}</div>`;
     }
 
     if (key === todayKey) el.classList.add("today");
-    if (cleared === total) el.classList.add("full"); // 7/7の日は特別に光らせる
+    if (cleared === total) el.classList.add("full");
 
     grid.appendChild(el);
   }
 }
-
-    function changeMonth(delta) {
-      calMonth += delta;
-      if (calMonth < 0) { calMonth = 11; calYear--; }
-      if (calMonth > 11) { calMonth = 0; calYear++; }
-      renderCalendar();
-    }
 
     // ========== コメント ==========
     function showComment() {
