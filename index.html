@@ -710,7 +710,7 @@ const COMMENTS = {
 
       // 英単語 (dailyStats)
       try {
-        const stats = JSON.parse(localStorage.getItem("dailyStats") || "{}");
+        const stats = JSON.parse(localStorage.getItem("daily_attempts") || "{}");
         if (stats[today] >= 30) {
           if (!data[today].word) { data[today].word = true; updated++; }
         }
